@@ -1,0 +1,103 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <title>GradeGenie | AI that magically grades for you</title>
+</head>
+<body>
+
+    <div class="homepage-wrapper">
+        <div class="title-wrapper">
+            <div class="text-bg">
+                Welcome to GradeGenie!
+            </div>
+            <div class="text-sm">
+                Just upload student's exam paper image and see the magic
+            </div>
+        </div>
+
+        <form class="form-wrapper">
+            <div class="uploaded-images">
+
+            </div>
+            <label for="image-upload">
+
+                <i class="fa fa-cloud-upload" aria-hidden="true"></i>
+                <h3>Browse file to Upload</h3>
+            </label>
+            <input type="file" hidden multiple id="image-upload">
+
+            <textarea name="" id="" placeholder="Special Instructions here..." cols="30" rows="8"></textarea>
+
+            <button class="submit-btn" type="submit">
+                Start Grading
+            </button> 
+        </form>
+    </div>
+
+    <script src="https://kit.fontawesome.com/a1e2c404c4.js" crossorigin="anonymous"></script>
+
+
+    <script>
+        document.getElementById('image-upload').addEventListener('change', function(event) {
+            const uploadedImagesContainer = document.querySelector('.uploaded-images');
+            uploadedImagesContainer.innerHTML = ''; // clear previous previews
+        
+            const files = event.target.files;
+        
+            Array.from(files).forEach(file => {
+                if (!file.type.startsWith('image/')) return; // skip non-image files
+        
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.alt = file.name;
+                    uploadedImagesContainer.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+        
+        
+        // 🔥 Handle form submission
+        document.querySelector('.form-wrapper').addEventListener('submit', async function(e) {
+            e.preventDefault(); // stop form from reloading
+        
+            const fileInput = document.getElementById('image-upload');
+            const instructions = document.querySelector('textarea').value;
+            const files = fileInput.files;
+        
+            if (!files.length) {
+                alert("Please upload at least one image!");
+                return;
+            }
+        
+            const formData = new FormData();
+            Array.from(files).forEach(file => formData.append('images', file));
+            formData.append('instructions', instructions);
+        
+            try {
+                const response = await fetch('/api/grade/', { // 👈 change this URL to your Django route
+                    method: 'POST',
+                    body: formData,
+                });
+        
+                const result = await response.json();
+                console.log('✅ Server Response:', result);
+        
+                // Optional: show success message
+                alert("Grading started successfully!");
+            } catch (error) {
+                console.error('❌ Error:', error);
+                alert("Something went wrong while uploading!");
+            }
+        });
+        </script>
+        
+        
+</body>
+</html>
