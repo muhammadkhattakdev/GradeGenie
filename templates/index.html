@@ -79,7 +79,7 @@
             const formData = new FormData();
             Array.from(files).forEach(file => formData.append('images', file));
             formData.append('instructions', instructions);
-        
+
             try {
                 const response = await fetch('/api/grade/', { // 👈 change this URL to your Django route
                     method: 'POST',
